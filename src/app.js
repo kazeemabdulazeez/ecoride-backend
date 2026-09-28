@@ -3,6 +3,7 @@ const cors = require("cors");
 
 const authRoutes = require("./routes/authRoutes");
 const verificationRoutes = require("./routes/verificationRoutes");
+const driverProfileRoutes = require("./routes/driverProfileRoutes");
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/verification", verificationRoutes);
+app.use("/api/driver-profile", driverProfileRoutes);
 
 // Test route
 app.get("/", (req, res) => {
