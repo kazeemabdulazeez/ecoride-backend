@@ -4,6 +4,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const verificationRoutes = require("./routes/verificationRoutes");
 const driverProfileRoutes = require("./routes/driverProfileRoutes");
+const recurringCommuteRoutes = require("./routes/recurringCommuteRoutes");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/driver-profile", driverProfileRoutes);
+app.use("/api/recurring-commutes", recurringCommuteRoutes);
 
 // Test route
 app.get("/", (req, res) => {
