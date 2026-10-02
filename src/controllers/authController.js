@@ -2,9 +2,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const crypto = require("crypto");
-const { Resend } = require("resend");
+const { sendOtpEmail } = require("../services/emailService");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 // Generate JWT token
 const generateToken = (userId) => {
   return jwt.sign(
@@ -51,19 +50,19 @@ const register = async (req, res) => {
     const token = generateToken(user._id);
 
     res.status(201).json({
-  message: "User registered successfully. Please verify your email.",
-  token,
-  requiresEmailVerification: true,
-  user: {
-    id: user._id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    role: user.role,
-    emailVerified: user.emailVerified,
-    verificationStatus: user.verificationStatus,
-  },
-});
+      message: "User registered successfully. Please verify your email.",
+      token,
+      requiresEmailVerification: true,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        emailVerified: user.emailVerified,
+        verificationStatus: user.verificationStatus,
+      },
+    });
   } catch (error) {
     console.error("Registration error:", error.message);
 
@@ -114,6 +113,7 @@ const login = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         role: user.role,
+        emailVerified: user.emailVerified,
         verificationStatus: user.verificationStatus,
       },
     });
@@ -149,11 +149,12 @@ const sendOtp = async (req, res) => {
       });
     }
 
+    // Don't send OTP if already verified
     if (user.emailVerified) {
-  return res.status(400).json({
-    message: "User email is already verified",
-  });
-}
+      return res.status(400).json({
+        message: "User email is already verified",
+      });
+    }
 
     // Prevent requesting another OTP too quickly
     if (
@@ -178,39 +179,11 @@ const sendOtp = async (req, res) => {
 
     await user.save();
 
-    // Send OTP email
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL,
-      to: [user.email],
-      subject: "Your EcoRide Verification Code",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto;">
-          <h2>EcoRide Email Verification</h2>
-
-          <p>Hello ${user.firstName},</p>
-
-          <p>Your EcoRide verification code is:</p>
-
-          <div style="
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 8px;
-            margin: 24px 0;
-          ">
-            ${otp}
-          </div>
-
-          <p>This code expires in <strong>10 minutes</strong>.</p>
-
-          <p>If you did not request this code, you can safely ignore this email.</p>
-
-          <p>— EcoRide Team</p>
-        </div>
-      `,
-    });
-
-    if (error) {
-      console.error("Resend email error:", error);
+    // Send OTP using Nodemailer + Gmail OAuth2
+    try {
+      await sendOtpEmail(user.email, otp);
+    } catch (error) {
+      console.error("OTP email error:", error);
 
       // Clear OTP if email could not be sent
       user.otpHash = null;
@@ -225,7 +198,7 @@ const sendOtp = async (req, res) => {
       });
     }
 
-    console.log(`OTP email sent to ${user.email}. Email ID: ${data?.id}`);
+    console.log(`OTP email sent to ${user.email}`);
 
     res.status(200).json({
       message: "OTP sent successfully",
@@ -283,7 +256,10 @@ const verifyOtp = async (req, res) => {
       });
     }
 
-    const isValidOtp = await bcrypt.compare(otp.toString(), user.otpHash);
+    const isValidOtp = await bcrypt.compare(
+      otp.toString(),
+      user.otpHash
+    );
 
     if (!isValidOtp) {
       user.otpAttempts += 1;
@@ -295,18 +271,18 @@ const verifyOtp = async (req, res) => {
     }
 
     // OTP is correct
-user.emailVerified = true;
-user.otpHash = null;
-user.otpExpiresAt = null;
-user.otpAttempts = 0;
-user.otpLastSentAt = null;
+    user.emailVerified = true;
+    user.otpHash = null;
+    user.otpExpiresAt = null;
+    user.otpAttempts = 0;
+    user.otpLastSentAt = null;
 
     await user.save();
 
     res.status(200).json({
-  message: "OTP verified successfully",
-  emailVerified: user.emailVerified,
-});
+      message: "OTP verified successfully",
+      emailVerified: user.emailVerified,
+    });
   } catch (error) {
     console.error("Verify OTP error:", error.message);
 
