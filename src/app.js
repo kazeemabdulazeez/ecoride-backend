@@ -7,6 +7,7 @@ const driverProfileRoutes = require("./routes/driverProfileRoutes");
 const recurringCommuteRoutes = require("./routes/recurringCommuteRoutes");
 const matchingRoutes = require("./routes/matchingRoutes");
 const commutePoolRoutes = require("./routes/commutePoolRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use("/api/driver-profile", driverProfileRoutes);
 app.use("/api/recurring-commutes", recurringCommuteRoutes);
 app.use("/api/matching", matchingRoutes);
 app.use("/api/commute-pools", commutePoolRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 // Test route
 app.get("/", (req, res) => {
