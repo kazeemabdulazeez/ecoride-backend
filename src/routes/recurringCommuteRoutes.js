@@ -13,25 +13,147 @@ const {
 
 const router = express.Router();
 
-// All recurring commute routes require authentication
-router.use(protect);
+/**
+ * @swagger
+ * tags:
+ *   name: Recurring Commute
+ *   description: Recurring commute management
+ */
 
-// Create a recurring commute
-router.post("/", createRecurringCommute);
+/**
+ * @swagger
+ * /api/recurring-commutes:
+ *   post:
+ *     summary: Create a recurring commute
+ *     tags: [Recurring Commute]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Recurring commute created successfully
+ *       400:
+ *         description: Invalid recurring commute data
+ *       401:
+ *         description: Authentication required
+ */
+router.post("/", protect, createRecurringCommute);
 
-// Get all recurring commutes belonging to the logged-in user
-router.get("/", getMyRecurringCommutes);
+/**
+ * @swagger
+ * /api/recurring-commutes:
+ *   get:
+ *     summary: Get current user's recurring commutes
+ *     tags: [Recurring Commute]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Recurring commutes retrieved successfully
+ *       401:
+ *         description: Authentication required
+ */
+router.get("/", protect, getMyRecurringCommutes);
 
-// Get one recurring commute
-router.get("/:id", getRecurringCommuteById);
+/**
+ * @swagger
+ * /api/recurring-commutes/{id}:
+ *   get:
+ *     summary: Get a recurring commute by ID
+ *     tags: [Recurring Commute]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Recurring commute ID
+ *     responses:
+ *       200:
+ *         description: Recurring commute retrieved successfully
+ *       401:
+ *         description: Authentication required
+ *       404:
+ *         description: Recurring commute not found
+ */
+router.get("/:id", protect, getRecurringCommuteById);
 
-// Update a recurring commute
-router.patch("/:id", updateRecurringCommute);
+/**
+ * @swagger
+ * /api/recurring-commutes/{id}:
+ *   patch:
+ *     summary: Update a recurring commute
+ *     tags: [Recurring Commute]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Recurring commute ID
+ *     responses:
+ *       200:
+ *         description: Recurring commute updated successfully
+ *       400:
+ *         description: Invalid recurring commute data
+ *       401:
+ *         description: Authentication required
+ *       404:
+ *         description: Recurring commute not found
+ */
+router.patch("/:id", protect, updateRecurringCommute);
 
-// Pause a recurring commute
-router.patch("/:id/pause", pauseRecurringCommute);
+/**
+ * @swagger
+ * /api/recurring-commutes/{id}/pause:
+ *   patch:
+ *     summary: Pause a recurring commute
+ *     tags: [Recurring Commute]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Recurring commute ID
+ *     responses:
+ *       200:
+ *         description: Recurring commute paused successfully
+ *       401:
+ *         description: Authentication required
+ *       404:
+ *         description: Recurring commute not found
+ */
+router.patch("/:id/pause", protect, pauseRecurringCommute);
 
-// Cancel a recurring commute
-router.patch("/:id/cancel", cancelRecurringCommute);
+/**
+ * @swagger
+ * /api/recurring-commutes/{id}/cancel:
+ *   patch:
+ *     summary: Cancel a recurring commute
+ *     tags: [Recurring Commute]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Recurring commute ID
+ *     responses:
+ *       200:
+ *         description: Recurring commute cancelled successfully
+ *       401:
+ *         description: Authentication required
+ *       404:
+ *         description: Recurring commute not found
+ */
+router.patch("/:id/cancel", protect, cancelRecurringCommute);
 
 module.exports = router;
