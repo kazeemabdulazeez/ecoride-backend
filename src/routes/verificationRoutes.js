@@ -24,6 +24,20 @@ const router = express.Router();
  *     tags: [Verification]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - verificationType
+ *             properties:
+ *               verificationType:
+ *                 type: string
+ *                 description: Type of verification being submitted
+ *           example:
+ *             verificationType: "identity"
  *     responses:
  *       201:
  *         description: Verification submitted successfully
@@ -31,6 +45,8 @@ const router = express.Router();
  *         description: Invalid verification data
  *       401:
  *         description: Authentication required
+ *       500:
+ *         description: Server error during verification submission
  */
 router.post("/", protect, submitVerification);
 
