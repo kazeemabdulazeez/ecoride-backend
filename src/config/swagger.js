@@ -9,11 +9,15 @@ const options = {
       description: "Backend API documentation for the EcoRide Smart Carpool & Daily Commute Platform",
     },
     servers: [
-      {
-        url: "http://localhost:5000",
-        description: "Local development server",
-      },
-    ],
+  {
+    url: "https://ecoride-backend-mdlg.onrender.com",
+    description: "Production server",
+  },
+  {
+    url: "http://localhost:5000",
+    description: "Local development server",
+  },
+],
     components: {
       securitySchemes: {
         bearerAuth: {
