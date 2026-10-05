@@ -32,19 +32,40 @@ const router = express.Router();
  *             type: object
  *             required:
  *               - verificationType
+ *               - documentType
+ *               - documentNumber
  *             properties:
  *               verificationType:
  *                 type: string
  *                 description: Type of verification being submitted
+ *                 example: identity
+ *               documentType:
+ *                 type: string
+ *                 description: Type of verification document
+ *                 example: national_id
+ *               documentNumber:
+ *                 type: string
+ *                 description: Verification document number
+ *                 example: TEST123456
+ *               documentUrl:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Optional URL for the uploaded verification document
+ *                 example: https://example.com/document
  *           example:
- *             verificationType: "identity"
+ *             verificationType: identity
+ *             documentType: national_id
+ *             documentNumber: TEST123456
+ *             documentUrl: https://example.com/document
  *     responses:
  *       201:
- *         description: Verification submitted successfully
+ *         description: Verification information submitted successfully
  *       400:
- *         description: Invalid verification data
+ *         description: Verification type, document type or document number is missing
  *       401:
  *         description: Authentication required
+ *       409:
+ *         description: Verification information has already been submitted
  *       500:
  *         description: Server error during verification submission
  */
