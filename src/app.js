@@ -16,6 +16,11 @@ const walletPaymentRoutes = require("./routes/walletPaymentRoutes");
 const refundRoutes = require("./routes/refundRoutes");
 const paymentReconciliationRoutes = require("./routes/paymentReconciliationRoutes");
 
+
+const tripRoutes = require("./routes/triproutes");
+const incidentRoutes = require("./routes/incidentRoutes");
+const locationRoutes = require("./routes/locationRoutes");
+const tripShareRoutes = require("./routes/tripShareRoutes");
 const app = express();
 
 // Middleware
@@ -40,6 +45,10 @@ app.use(
   paymentReconciliationRoutes
 );
 
+app.use("/api/trips", tripRoutes);
+app.use("/api/incidents", incidentRoutes);
+app.use("/api/locations", locationRoutes);
+app.use("/api/trip-shares", tripShareRoutes);
 
 // Test route
 app.get("/", (req, res) => {
@@ -49,3 +58,4 @@ app.get("/", (req, res) => {
 });
 
 module.exports = app;
+
