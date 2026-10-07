@@ -28,6 +28,102 @@ const router = express.Router();
  *     tags: [Recurring Commute]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - route
+ *               - schedule
+ *             properties:
+ *               route:
+ *                 type: object
+ *                 required:
+ *                   - origin
+ *                   - destination
+ *                 properties:
+ *                   origin:
+ *                     type: object
+ *                     required:
+ *                       - name
+ *                       - latitude
+ *                       - longitude
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: "Ikeja"
+ *                       latitude:
+ *                         type: number
+ *                         example: 6.6018
+ *                       longitude:
+ *                         type: number
+ *                         example: 3.3515
+ *                   destination:
+ *                     type: object
+ *                     required:
+ *                       - name
+ *                       - latitude
+ *                       - longitude
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: "Victoria Island"
+ *                       latitude:
+ *                         type: number
+ *                         example: 6.4281
+ *                       longitude:
+ *                         type: number
+ *                         example: 3.4219
+ *               schedule:
+ *                 type: object
+ *                 required:
+ *                   - days
+ *                   - departureTime
+ *                 properties:
+ *                   days:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                       enum:
+ *                         - monday
+ *                         - tuesday
+ *                         - wednesday
+ *                         - thursday
+ *                         - friday
+ *                         - saturday
+ *                         - sunday
+ *                     example:
+ *                       - monday
+ *                       - wednesday
+ *                       - friday
+ *                   departureTime:
+ *                     type: string
+ *                     example: "08:00"
+ *               pickupPoints:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: "Ikeja City Mall"
+ *                     latitude:
+ *                       type: number
+ *                       example: 6.6170
+ *                     longitude:
+ *                       type: number
+ *                       example: 3.3510
+ *               preferences:
+ *                 type: object
+ *                 properties:
+ *                   seatsNeeded:
+ *                     type: number
+ *                     example: 1
+ *                   notes:
+ *                     type: string
+ *                     example: "Morning commute"
  *     responses:
  *       201:
  *         description: Recurring commute created successfully
