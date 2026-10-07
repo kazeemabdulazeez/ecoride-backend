@@ -1,23 +1,36 @@
 const swaggerJsdoc = require("swagger-jsdoc");
 
+const codespaceUrl =
+  process.env.CODESPACE_NAME && process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN
+    ? `https://${process.env.CODESPACE_NAME}-5000.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`
+    : "http://localhost:5000";
+
 const options = {
   definition: {
     openapi: "3.0.0",
+
     info: {
       title: "EcoRide API",
       version: "1.0.0",
-      description: "Backend API documentation for the EcoRide Smart Carpool & Daily Commute Platform",
+      description:
+        "Backend API documentation for the EcoRide Smart Carpool & Daily Commute Platform",
     },
+
     servers: [
-  {
-    url: "https://ecoride-backend-mdlg.onrender.com",
-    description: "Production server",
-  },
-  {
-    url: "http://localhost:5000",
-    description: "Local development server",
-  },
-],
+      {
+        url: codespaceUrl,
+        description: "GitHub Codespaces server",
+      },
+      {
+        url: "https://ecoride-backend-mdlg.onrender.com",
+        description: "Production server",
+      },
+      {
+        url: "http://localhost:5000",
+        description: "Local development server",
+      },
+    ],
+
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -28,6 +41,7 @@ const options = {
       },
     },
   },
+
   apis: ["./src/routes/*.js"],
 };
 

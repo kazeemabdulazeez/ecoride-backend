@@ -26,6 +26,19 @@ const router = express.Router();
  *     tags: [Commute Pool]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - recurringCommuteId
+ *             properties:
+ *               recurringCommuteId:
+ *                 type: string
+ *                 description: ID of the driver's active recurring commute
+ *                 example: "64f123456789abcdef123456"
  *     responses:
  *       201:
  *         description: Commute pool created successfully
@@ -53,6 +66,19 @@ router.post("/", protect, createCommutePool);
  *         schema:
  *           type: string
  *         description: Commute pool ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - seats
+ *             properties:
+ *               seats:
+ *                 type: integer
+ *                 minimum: 1
+ *                 example: 1
  *     responses:
  *       200:
  *         description: Successfully joined commute pool

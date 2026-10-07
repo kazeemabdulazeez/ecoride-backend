@@ -10,6 +10,11 @@ const commutePoolRoutes = require("./routes/commutePoolRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
+const paymentRoutes = require("./routes/paymentRoutes");
+const walletRoutes = require("./routes/walletRoutes");
+const walletPaymentRoutes = require("./routes/walletPaymentRoutes");
+const refundRoutes = require("./routes/refundRoutes");
+const paymentReconciliationRoutes = require("./routes/paymentReconciliationRoutes");
 
 const app = express();
 
@@ -26,6 +31,15 @@ app.use("/api/recurring-commutes", recurringCommuteRoutes);
 app.use("/api/matching", matchingRoutes);
 app.use("/api/commute-pools", commutePoolRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/wallet", walletRoutes);
+app.use("/api/wallet-payments", walletPaymentRoutes);
+app.use("/api/refunds", refundRoutes);
+app.use(
+  "/api/payment-reconciliation",
+  paymentReconciliationRoutes
+);
+
 
 // Test route
 app.get("/", (req, res) => {
