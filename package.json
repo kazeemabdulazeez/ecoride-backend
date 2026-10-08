@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js"
-},
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kazeemabdulazeez/ecoride-backend.git"
@@ -20,12 +20,18 @@
   },
   "homepage": "https://github.com/kazeemabdulazeez/ecoride-backend#readme",
   "dependencies": {
+    "axios": "^1.20.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^18.0.4",
     "express": "^5.2.1",
+    "googleapis": "^182.0.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.10.2"
+    "mongoose": "^9.10.2",
+    "nodemailer": "^10.0.13",
+    "resend": "^6.31.0",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

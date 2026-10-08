@@ -35,9 +35,34 @@ const userSchema = new mongoose.Schema(
     },
 
     verificationStatus: {
-      type: String,
-      enum: ["pending", "verified", "rejected"],
-      default: "pending",
+  type: String,
+  enum: ["pending", "verified", "rejected"],
+  default: "pending",
+},
+
+emailVerified: {
+  type: Boolean,
+  default: false,
+},
+
+otpHash: {
+  type: String,
+  default: null,
+},
+
+    otpExpiresAt: {
+      type: Date,
+      default: null,
+    },
+
+    otpAttempts: {
+      type: Number,
+      default: 0,
+    },
+
+    otpLastSentAt: {
+      type: Date,
+      default: null,
     },
   },
   {
