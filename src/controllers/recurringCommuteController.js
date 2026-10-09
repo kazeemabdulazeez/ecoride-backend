@@ -1,4 +1,7 @@
 const RecurringCommute = require("../models/RecurringCommute");
+const {
+  createNotification,
+} = require("../services/notificationService");
 
 // Create recurring commute
 const createRecurringCommute = async (req, res) => {
@@ -51,7 +54,7 @@ const createRecurringCommute = async (req, res) => {
       message: "Recurring commute created successfully",
       commute,
     });
-    } catch (error) {
+  } catch (error) {
     console.error("Create recurring commute error:", error.message);
 
     if (error.name === "ValidationError") {
@@ -66,6 +69,7 @@ const createRecurringCommute = async (req, res) => {
     });
   }
 };
+
 // Get current user's recurring commutes
 const getMyRecurringCommutes = async (req, res) => {
   try {
@@ -127,6 +131,9 @@ const updateRecurringCommute = async (req, res) => {
       });
     }
 
+    const body = req.body || {};
+    const scheduleChanged = body.schedule !== undefined;
+
     const allowedFields = [
       "route",
       "schedule",
@@ -136,12 +143,22 @@ const updateRecurringCommute = async (req, res) => {
     ];
 
     for (const field of allowedFields) {
-      if (req.body[field] !== undefined) {
-        commute[field] = req.body[field];
+      if (body[field] !== undefined) {
+        commute[field] = body[field];
       }
     }
 
     await commute.save();
+
+    if (scheduleChanged) {
+      await createNotification({
+        recipient: commute.commuter,
+        type: "schedule_change",
+        title: "Commute schedule updated",
+        message:
+          "Your recurring commute schedule has been updated successfully.",
+      });
+    }
 
     res.status(200).json({
       message: "Recurring commute updated successfully",

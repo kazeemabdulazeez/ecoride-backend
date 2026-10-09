@@ -180,6 +180,7 @@ router.get("/:id", protect, getRecurringCommuteById);
  * /api/recurring-commutes/{id}:
  *   patch:
  *     summary: Update a recurring commute
+ *     description: Update the route, schedule, pickup points, preferences, or status of a recurring commute. A schedule update triggers a schedule-change notification.
  *     tags: [Recurring Commute]
  *     security:
  *       - bearerAuth: []
@@ -190,6 +191,92 @@ router.get("/:id", protect, getRecurringCommuteById);
  *         schema:
  *           type: string
  *         description: Recurring commute ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               route:
+ *                 type: object
+ *                 properties:
+ *                   origin:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: "Ikeja"
+ *                       latitude:
+ *                         type: number
+ *                         example: 6.6018
+ *                       longitude:
+ *                         type: number
+ *                         example: 3.3515
+ *                   destination:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: "Victoria Island"
+ *                       latitude:
+ *                         type: number
+ *                         example: 6.4281
+ *                       longitude:
+ *                         type: number
+ *                         example: 3.4219
+ *               schedule:
+ *                 type: object
+ *                 properties:
+ *                   days:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                       enum:
+ *                         - monday
+ *                         - tuesday
+ *                         - wednesday
+ *                         - thursday
+ *                         - friday
+ *                         - saturday
+ *                         - sunday
+ *                     example:
+ *                       - monday
+ *                       - wednesday
+ *                       - friday
+ *                   departureTime:
+ *                     type: string
+ *                     example: "09:00"
+ *               pickupPoints:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: "Ikeja City Mall"
+ *                     latitude:
+ *                       type: number
+ *                       example: 6.6170
+ *                     longitude:
+ *                       type: number
+ *                       example: 3.3510
+ *               preferences:
+ *                 type: object
+ *                 properties:
+ *                   seatsNeeded:
+ *                     type: number
+ *                     example: 1
+ *                   notes:
+ *                     type: string
+ *                     example: "Updated morning commute"
+ *               status:
+ *                 type: string
+ *                 enum:
+ *                   - active
+ *                   - paused
+ *                   - cancelled
+ *                 example: "active"
  *     responses:
  *       200:
  *         description: Recurring commute updated successfully
