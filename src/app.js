@@ -1,3 +1,6 @@
+const reliabilityRoutes = require("./routes/reliabilityRoutes");
+const incidentReportRoutes = require("./routes/incidentReportRoutes");
+const ratingRoutes = require("./routes/ratingRoutes");
 const express = require("express");
 const cors = require("cors");
 
@@ -24,6 +27,9 @@ app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
+app.use("/api/reliability", reliabilityRoutes);
+app.use("/api/incidents", incidentReportRoutes);
+app.use("/api/ratings", ratingRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/driver-profile", driverProfileRoutes);

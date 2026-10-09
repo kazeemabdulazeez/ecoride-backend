@@ -1,3 +1,4 @@
+
 const express = require("express");
 const protect = require("../middleware/authMiddleware");
 
@@ -8,6 +9,7 @@ const {
   acceptBooking,
   rejectBooking,
   cancelBooking,
+  completeBooking,
 } = require("../controllers/bookingController");
 
 const router = express.Router();
@@ -207,5 +209,34 @@ router.patch("/:bookingId/reject", rejectBooking);
  *         description: Booking cannot be cancelled in its current state
  */
 router.patch("/:bookingId/cancel", cancelBooking);
+
+/**
+ * @swagger
+ * /api/bookings/{bookingId}/complete:
+ *   patch:
+ *     summary: Mark an accepted booking as completed
+ *     tags: [Booking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: bookingId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the booking
+ *     responses:
+ *       200:
+ *         description: Booking marked as completed
+ *       400:
+ *         description: Booking cannot be completed
+ *       401:
+ *         description: Authentication required
+ *       403:
+ *         description: Only the pool driver can complete a booking
+ *       404:
+ *         description: Booking or commute pool not found
+ */
+router.patch("/:bookingId/complete", completeBooking);
 
 module.exports = router;

@@ -446,6 +446,55 @@ const cancelBooking = async (req, res) => {
   }
 };
 
+
+
+const completeBooking = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return res.status(400).json({ message: "Invalid booking ID." });
+    }
+
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found." });
+    }
+
+    const pool = await CommutePool.findById(booking.pool);
+
+    if (!pool) {
+      return res.status(404).json({ message: "Commute pool not found." });
+    }
+
+    if (pool.driver.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "Only the pool driver can complete this booking.",
+      });
+    }
+
+    if (booking.status !== "accepted") {
+      return res.status(409).json({
+        message: "Only accepted bookings can be marked completed.",
+      });
+    }
+
+    booking.status = "completed";
+    await booking.save();
+
+    return res.status(200).json({
+      message: "Booking marked as completed.",
+      booking,
+    });
+  } catch (error) {
+    console.error("Complete booking error:", error);
+    return res.status(500).json({
+      message: "Failed to complete booking.",
+    });
+  }
+};
+
 module.exports = {
   createBooking,
   getMyBookings,
@@ -453,4 +502,5 @@ module.exports = {
   acceptBooking,
   rejectBooking,
   cancelBooking,
+  completeBooking,
 };
