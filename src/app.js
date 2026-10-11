@@ -22,6 +22,8 @@ const tripSessionRoutes = require("./routes/tripSessionRoutes");
 const tripLocationRoutes = require("./routes/tripLocationRoutes");
 const incidentRoutes = require("./routes/incidentRoutes");
 const tripShareRoutes = require("./routes/tripShareRoutes");
+const scheduledTripRoutes = require("./routes/scheduledTripRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
@@ -53,6 +55,8 @@ app.use("/api/trip-sessions", tripSessionRoutes);
 app.use("/api/trip-locations", tripLocationRoutes);
 app.use("/api/incidents", incidentRoutes);
 app.use("/api/trip-shares", tripShareRoutes);
+app.use("/api/scheduled-trips", scheduledTripRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 
 // Test route

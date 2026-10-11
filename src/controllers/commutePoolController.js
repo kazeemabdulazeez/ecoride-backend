@@ -2,8 +2,51 @@ const mongoose = require("mongoose");
 const CommutePool = require("../models/CommutePool");
 const RecurringCommute = require("../models/RecurringCommute");
 const DriverProfile = require("../models/DriverProfile");
-const User = require("../models/User");
+const {
+  createNotification,
+} = require("../services/notificationService");
 
+// Notify users affected by a pool change
+const notifyPoolChange = async (
+  pool,
+  message,
+  eventId,
+  additionalRecipients = []
+) => {
+  try {
+    const recipientIds = new Set();
+
+    if (pool.driver) {
+      recipientIds.add(pool.driver.toString());
+    }
+
+    for (const member of pool.members || []) {
+      if (member.status === "active" && member.passenger) {
+        recipientIds.add(member.passenger.toString());
+      }
+    }
+
+    for (const recipient of additionalRecipients) {
+      if (recipient) {
+        recipientIds.add(recipient.toString());
+      }
+    }
+
+    for (const recipient of recipientIds) {
+      await createNotification({
+        recipient,
+        type: "pool_change",
+        title: "Commute pool updated",
+        message,
+        dedupeKey: `pool_change:${pool._id}:${eventId}:${recipient}`,
+      });
+    }
+  } catch (error) {
+    console.error("Pool change notification error:", error.message);
+  }
+};
+
+// Create commute pool
 const createCommutePool = async (req, res) => {
   try {
     if (req.user.role !== "driver") {
@@ -91,6 +134,8 @@ const createCommutePool = async (req, res) => {
     });
   }
 };
+
+// Join commute pool
 const joinCommutePool = async (req, res) => {
   const session = await mongoose.startSession();
 
@@ -173,6 +218,13 @@ const joinCommutePool = async (req, res) => {
       joinedPool = pool;
     });
 
+    await notifyPoolChange(
+      joinedPool,
+      `A passenger joined your commute pool and booked ${seats} seat(s).`,
+      `join:${req.user._id}:${joinedPool.updatedAt.getTime()}`,
+      [req.user._id]
+    );
+
     const populatedPool = await CommutePool.findById(joinedPool._id)
       .populate("driver", "firstName lastName email role")
       .populate("members.passenger", "firstName lastName email role")
@@ -195,6 +247,7 @@ const joinCommutePool = async (req, res) => {
   }
 };
 
+// Get commute pool
 const getCommutePool = async (req, res) => {
   try {
     const { poolId } = req.params;
@@ -228,6 +281,7 @@ const getCommutePool = async (req, res) => {
   }
 };
 
+// Get my commute pools
 const getMyCommutePools = async (req, res) => {
   try {
     const pools = await CommutePool.find({
@@ -253,6 +307,7 @@ const getMyCommutePools = async (req, res) => {
   }
 };
 
+// Leave commute pool
 const leaveCommutePool = async (req, res) => {
   const session = await mongoose.startSession();
 
@@ -303,6 +358,13 @@ const leaveCommutePool = async (req, res) => {
 
       updatedPool = pool;
     });
+
+    await notifyPoolChange(
+      updatedPool,
+      "A passenger has left your commute pool. Seat availability has been updated.",
+      `leave:${req.user._id}:${updatedPool.updatedAt.getTime()}`,
+      [req.user._id]
+    );
 
     const populatedPool = await CommutePool.findById(updatedPool._id)
       .populate("driver", "firstName lastName email role")
