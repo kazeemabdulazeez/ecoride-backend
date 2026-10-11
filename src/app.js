@@ -18,6 +18,10 @@ const walletRoutes = require("./routes/walletRoutes");
 const walletPaymentRoutes = require("./routes/walletPaymentRoutes");
 const refundRoutes = require("./routes/refundRoutes");
 const paymentReconciliationRoutes = require("./routes/paymentReconciliationRoutes");
+const tripSessionRoutes = require("./routes/tripSessionRoutes");
+const tripLocationRoutes = require("./routes/tripLocationRoutes");
+const incidentRoutes = require("./routes/incidentRoutes");
+const tripShareRoutes = require("./routes/tripShareRoutes");
 
 const app = express();
 
@@ -45,6 +49,10 @@ app.use(
   "/api/payment-reconciliation",
   paymentReconciliationRoutes
 );
+app.use("/api/trip-sessions", tripSessionRoutes);
+app.use("/api/trip-locations", tripLocationRoutes);
+app.use("/api/incidents", incidentRoutes);
+app.use("/api/trip-shares", tripShareRoutes);
 
 
 // Test route
