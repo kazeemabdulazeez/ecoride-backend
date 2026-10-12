@@ -1,3 +1,4 @@
+
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -26,7 +27,10 @@ const register = async (req, res) => {
     }
 
     // Check if email already exists
-    const existingUser = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase().trim();
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
+    });
 
     if (existingUser) {
       return res.status(409).json({
@@ -37,21 +41,19 @@ const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user as unverified
     const user = await User.create({
       firstName,
       lastName,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       role: role || "passenger",
+      emailVerified: false,
     });
 
-    // Generate token
-    const token = generateToken(user._id);
-
+    // Do not issue a JWT before email verification
     res.status(201).json({
       message: "User registered successfully. Please verify your email.",
-      token,
       requiresEmailVerification: true,
       user: {
         id: user._id,
@@ -84,7 +86,9 @@ const login = async (req, res) => {
     }
 
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
 
     if (!user) {
       return res.status(401).json({
@@ -93,7 +97,10 @@ const login = async (req, res) => {
     }
 
     // Compare password
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    const passwordMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!passwordMatch) {
       return res.status(401).json({
@@ -101,7 +108,15 @@ const login = async (req, res) => {
       });
     }
 
-    // Generate token
+    // Require email verification before login
+    if (user.emailVerified !== true) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in",
+        requiresEmailVerification: true,
+      });
+    }
+
+    // Generate token only after successful verification
     const token = generateToken(user._id);
 
     res.status(200).json({
@@ -173,7 +188,7 @@ const sendOtp = async (req, res) => {
     const otpHash = await bcrypt.hash(otp, 10);
 
     user.otpHash = otpHash;
-    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    user.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
     user.otpAttempts = 0;
     user.otpLastSentAt = new Date();
 
