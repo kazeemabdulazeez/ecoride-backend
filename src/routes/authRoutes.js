@@ -20,7 +20,7 @@ const router = express.Router();
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new passenger
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
@@ -51,7 +51,7 @@ const router = express.Router();
  *                 example: Password123!
  *               role:
  *                 type: string
- *                 enum: [passenger, driver]
+ *                 enum: [passenger]
  *                 example: passenger
  *     responses:
  *       201:
