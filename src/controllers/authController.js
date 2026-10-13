@@ -14,20 +14,38 @@ const generateToken = (userId) => {
   );
 };
 
-// Register user
+// Register passenger
 const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password, role } = req.body;
 
-    // Check required fields
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({
-        message: "Please provide first name, last name, email and password",
+    // Public registration is for passengers only
+    if (role && role !== "passenger") {
+      return res.status(403).json({
+        message:
+          "Driver registration is unavailable. Driver accounts must be authorized through the InDrive partnership.",
       });
     }
 
-    // Check if email already exists
+    // Check required fields
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({
+        message:
+          "Please provide first name, last name, email and password",
+      });
+    }
+
+    // Check password length
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Normalize email
     const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if email already exists
     const existingUser = await User.findOne({
       email: normalizedEmail,
     });
@@ -41,19 +59,19 @@ const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user as unverified
+    // Create passenger account as unverified
     const user = await User.create({
       firstName,
       lastName,
       email: normalizedEmail,
       password: hashedPassword,
-      role: role || "passenger",
+      role: "passenger",
       emailVerified: false,
     });
 
     // Do not issue a JWT before email verification
-    res.status(201).json({
-      message: "User registered successfully. Please verify your email.",
+    return res.status(201).json({
+      message: "Passenger registered successfully. Please verify your email.",
       requiresEmailVerification: true,
       user: {
         id: user._id,
@@ -68,13 +86,13 @@ const register = async (req, res) => {
   } catch (error) {
     console.error("Registration error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error during registration",
     });
   }
 };
 
-// Login user
+// Login passenger or authorized driver
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -96,7 +114,7 @@ const login = async (req, res) => {
       });
     }
 
-    // Compare password
+    // Verify password for every account
     const passwordMatch = await bcrypt.compare(
       password,
       user.password
@@ -108,18 +126,19 @@ const login = async (req, res) => {
       });
     }
 
-    // Require email verification before login
-    if (user.emailVerified !== true) {
+    // Passengers must verify email before logging in.
+    // Driver accounts do not require email OTP.
+    if (user.role === "passenger" && user.emailVerified !== true) {
       return res.status(403).json({
         message: "Please verify your email before logging in",
         requiresEmailVerification: true,
       });
     }
 
-    // Generate token only after successful verification
+    // Generate token after successful authentication
     const token = generateToken(user._id);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
       token,
       user: {
@@ -135,7 +154,7 @@ const login = async (req, res) => {
   } catch (error) {
     console.error("Login error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error during login",
     });
   }
@@ -146,9 +165,9 @@ const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
 
-    if (!email) {
+    if (!email || typeof email !== "string") {
       return res.status(400).json({
-        message: "Email is required",
+        message: "A valid email is required",
       });
     }
 
@@ -161,6 +180,13 @@ const sendOtp = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         message: "User not found",
+      });
+    }
+
+    // OTP verification is only for passengers
+    if (user.role !== "passenger") {
+      return res.status(400).json({
+        message: "Email OTP verification is not required for drivers",
       });
     }
 
@@ -215,13 +241,13 @@ const sendOtp = async (req, res) => {
 
     console.log(`OTP email sent to ${user.email}`);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "OTP sent successfully",
     });
   } catch (error) {
     console.error("Send OTP error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error while sending OTP",
     });
   }
@@ -248,6 +274,13 @@ const verifyOtp = async (req, res) => {
       });
     }
 
+    // OTP verification is only for passengers
+    if (user.role !== "passenger") {
+      return res.status(400).json({
+        message: "Email OTP verification is not required for drivers",
+      });
+    }
+
     if (!user.otpHash || !user.otpExpiresAt) {
       return res.status(400).json({
         message: "No active OTP. Please request a new OTP",
@@ -258,6 +291,8 @@ const verifyOtp = async (req, res) => {
       user.otpHash = null;
       user.otpExpiresAt = null;
       user.otpAttempts = 0;
+      user.otpLastSentAt = null;
+
       await user.save();
 
       return res.status(400).json({
@@ -294,14 +329,14 @@ const verifyOtp = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "OTP verified successfully",
       emailVerified: user.emailVerified,
     });
   } catch (error) {
     console.error("Verify OTP error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error while verifying OTP",
     });
   }
